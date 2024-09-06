@@ -1,0 +1,40 @@
+@openzeppelin/contracts=lib/openzeppelin-contracts/contracts
+
+
+
+
+[ mintInputs method response ]
+
+[
+
+  owner (address) : 0x96d9e26d3c6f71838ac2dcef23b256ed51a75e1a
+
+  prompt (string) : Generate a realistic digital painting portrait of a curious cat with an endearing [specific expression], crowned with [type of flowers/nature elements], and in a dreamlike landscape with [fantasy elements]. The animal should have a majestic and dignified expression.
+
+  isMinted (bool) : true
+
+]
+
+[ mintInputs method response ]
+
+[
+
+  owner (address) : 0x96d9e26d3c6f71838ac2dcef23b256ed51a75e1a
+
+  prompt (string) : Generate a realistic digital painting portrait of a curious cat with an endearing [specific expression], crowned with [type of flowers/nature elements], and in a dreamlike landscape with [fantasy elements]. The animal should have a majestic and dignified expression.
+
+  isMinted (bool) : true
+
+]
+
+[ mintInputs method response ]
+
+[
+
+  owner (address) : 0x96d9e26d3c6f71838ac2dcef23b256ed51a75e1a
+
+  prompt (string) : Generate a realistic digital painting portrait of a curious cat with an endearing [specific expression], crowned with [type of flowers/nature elements], and surrounded by [specific nature elements]. The animal should have a majestic and dignified expression.
+
+  isMinted (bool) : true
+
+]
