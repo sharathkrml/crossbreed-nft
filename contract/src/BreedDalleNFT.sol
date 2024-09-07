@@ -269,28 +269,22 @@ contract BreedDalleNFT is IERC721Receiver {
         "graffiti street art"
     ];
     IDalleNft public s_dalleNft;
-    uint256 public s_tokenId = 0;
 
     struct MintInput {
         address owner;
-        uint256 dalleTokenId;
         uint8[10] answers;
-        bool isMinted;
+        uint256 parent1;
+        uint256 parent2;
     }
 
-    mapping(uint256 tokenId => MintInput mintInput) public mintInputs;
-    uint256[] public dalleTokenIds;
+    mapping(uint256 dalleTokenId => MintInput mintInput) public mintInputs;
+    uint256[] public s_tokenIds;
 
-    event BreedMint(
+    event Breed(
         address indexed owner,
         uint256 indexed tokenId,
-        uint256 indexed dalleTokenId
-    );
-    event CrossBreed(
-        address indexed owner,
         uint256 indexed tokenId1,
-        uint256 indexed tokenId2,
-        uint256 dalleTokenId
+        uint256 tokenId2
     );
 
     // @param initialOracleAddress Initial address of the oracle contract
@@ -352,52 +346,80 @@ contract BreedDalleNFT is IERC721Receiver {
         return prompt;
     }
 
+    function getTokenIds() public view returns (uint256[] memory) {
+        return s_tokenIds;
+    }
+
+    function batchGetTokenUris(
+        uint256[] memory tokenIds
+    ) public view returns (string[] memory) {
+        string[] memory tokenUris = new string[](tokenIds.length);
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            tokenUris[i] = s_dalleNft.tokenURI(tokenIds[i]);
+        }
+        return tokenUris;
+    }
+
+    function batchGetTokenOwners(
+        uint256[] memory tokenIds
+    ) public view returns (address[] memory) {
+        address[] memory ownersArr = new address[](tokenIds.length);
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            ownersArr[i] = s_dalleNft.ownerOf(tokenIds[i]);
+        }
+        return ownersArr;
+    }
+
+    function batchGetMintInputs(
+        uint256[] memory tokenIds
+    ) public view returns (MintInput[] memory) {
+        MintInput[] memory mintInputArr = new MintInput[](tokenIds.length);
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            mintInputArr[i] = mintInputs[tokenIds[i]];
+        }
+        return mintInputArr;
+    }
+
     // @notice Initializes the minting process for a new NFT
     // @param message The user input to generate the NFT
     // @return The ID of the created mint input
-    function mint(uint8[10] memory _answers) public returns (uint256) {
-        uint256 currentId = s_tokenId++;
-        MintInput storage mintInput = mintInputs[currentId];
+    function _mint(uint8[10] memory _answers) internal returns (uint256) {
+        string memory fullPrompt = generatePrompt(_answers);
+        return s_dalleNft.initializeMint(fullPrompt);
+    }
 
+    function mint(uint8[10] memory _answers) external returns (uint256) {
+        uint256 tokenId = _mint(_answers);
+        MintInput storage mintInput = mintInputs[tokenId];
         mintInput.owner = msg.sender;
         mintInput.answers = _answers;
-
-        string memory fullPrompt = generatePrompt(_answers);
-        uint256 dalleTokenId = s_dalleNft.initializeMint(fullPrompt);
-        mintInput.dalleTokenId = dalleTokenId;
-        emit BreedMint(msg.sender, currentId, dalleTokenId);
-
-        return dalleTokenId;
+        mintInput.parent1 = 0;
+        mintInput.parent2 = 0;
+        s_tokenIds.push(tokenId);
+        emit Breed(msg.sender, tokenId, 0, 0);
+        return tokenId;
     }
 
     function breedAndMint(
         uint256 tokenId1,
         uint256 tokenId2
-    ) public returns (uint256) {
+    ) external returns (uint256) {
         MintInput memory mintInput1 = mintInputs[tokenId1];
         MintInput memory mintInput2 = mintInputs[tokenId2];
-
-        if (mintInput1.owner != msg.sender || mintInput2.owner != msg.sender) {
-            revert NotActualOwner();
-        }
-
         uint8[10] memory mixedAnswers = mixAnswers(
             mintInput1.answers,
             mintInput2.answers
         );
-
-        uint256 dalleTokenId = mint(mixedAnswers);
-
-        uint256 currentId = s_tokenId++;
-        MintInput storage mintInput = mintInputs[currentId];
-
-        mintInput.owner = msg.sender;
+        uint256 tokenId = _mint(mixedAnswers);
+        MintInput storage mintInput = mintInputs[tokenId];
         mintInput.answers = mixedAnswers;
-        mintInput.dalleTokenId = dalleTokenId;
+        mintInput.owner = msg.sender;
+        mintInput.parent1 = tokenId1;
+        mintInput.parent2 = tokenId2;
 
-        emit CrossBreed(msg.sender, tokenId1, tokenId2, dalleTokenId);
-
-        return dalleTokenId;
+        s_tokenIds.push(tokenId);
+        emit Breed(msg.sender, tokenId, tokenId1, tokenId2);
+        return tokenId;
     }
 
     function mixAnswers(
@@ -418,11 +440,7 @@ contract BreedDalleNFT is IERC721Receiver {
             revert NotActualOwner();
         }
         // Transfer the NFT to the contract owner
-        s_dalleNft.safeTransferFrom(
-            address(this),
-            mintInput.owner,
-            mintInput.dalleTokenId
-        );
+        s_dalleNft.safeTransferFrom(address(this), mintInput.owner, tokenId);
     }
 
     function getPrompt(uint256 tokenId) public view returns (string memory) {

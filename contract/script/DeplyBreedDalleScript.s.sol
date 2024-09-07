@@ -7,26 +7,35 @@ import {BreedDalleNFT} from "../src/BreedDalleNFT.sol";
 contract DeplyBreedDalleScript is Script {
     address public dalleNft = 0x4440b5eBEBac3DC6C4d4Eca62520ef783067EdDf;
 
-    // BreedDalleNFT breedDalleNFT =
-    //     BreedDalleNFT(0x1E8561fe88d20Db57938677566B0f329Ffd3FFF6);
+    BreedDalleNFT breedDalleNFT =
+        BreedDalleNFT(0x0d6181BabDeA5D3A2546636Ed8672a21D954d181);
 
     function run() public {
         vm.startBroadcast();
-        console.log("msg.sender", msg.sender);
-        BreedDalleNFT breedDalleNFT = new BreedDalleNFT(dalleNft);
-        console.log(
-            "minted dalleTokenId",
-            breedDalleNFT.mint([1, 2, 3, 1, 1, 1, 1, 1, 1, 1])
-        );
-        console.log(
-            "minted dalleTokenId",
-            breedDalleNFT.mint([2, 1, 1, 2, 1, 1, 1, 1, 1, 1])
-        );
-        (address owner0, uint256 dalleTokenId0, ) = breedDalleNFT.mintInputs(0);
-        console.log(owner0, dalleTokenId0);
-        (address owner1, uint256 dalleTokenId1, ) = breedDalleNFT.mintInputs(1);
-        console.log(owner1, dalleTokenId1);
-        breedDalleNFT.breedAndMint(0, 1);
+        // BreedDalleNFT breedDalleNFT = new BreedDalleNFT(dalleNft);
+        // uint256 mint1TokenId = breedDalleNFT.mint(
+        //     [1, 2, 3, 1, 1, 1, 1, 1, 1, 1]
+        // );
+        // console.log("minted mint1TokenId", mint1TokenId);
+        // uint256 mint2TokenId = breedDalleNFT.mint(
+        //     [2, 1, 1, 2, 1, 1, 1, 1, 1, 1]
+        // );
+        // console.log("minted mint2TokenId", mint2TokenId);
+
+        // uint256 mint3TokenId = breedDalleNFT.breedAndMint(
+        //     mint1TokenId,
+        //     mint2TokenId
+        // );
+        // console.log("minted mint3TokenId cross breed", mint3TokenId);
+
+        // uint256[] memory tokenIds = new uint256[](3);
+        // tokenIds[0] = 235;
+        // tokenIds[1] = 236;
+        // tokenIds[2] = 237;
+        breedDalleNFT.getTokenIds();
+        // breedDalleNFT.batchGetTokenOwners(tokenIds);
+        // breedDalleNFT.batchGetTokenUris(tokenIds);
+
         vm.stopBroadcast();
     }
 }

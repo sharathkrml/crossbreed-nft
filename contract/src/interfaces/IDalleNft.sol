@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 
 // @title IDalleNft
 // @notice This interface defines the functions for interacting with the DalleNft contract.
-interface IDalleNft {
+interface IDalleNft is IERC721, IERC721Metadata {
     // @notice Event emitted when a new mint input is created
     event MintInputCreated(address indexed owner, uint indexed chatId);
 
@@ -60,23 +62,4 @@ interface IDalleNft {
         address _owner,
         uint _chatId
     ) external pure returns (string[] memory);
-
-    //     *
-    //  * Requirements:
-    //  *
-    //  * - `from` cannot be the zero address.
-    //  * - `to` cannot be the zero address.
-    //  * - `tokenId` token must exist and be owned by `from`.
-    //  * - If the caller is not `from`, it must have been allowed to move this token by either {approve} or
-    //  *   {setApprovalForAll}.
-    //  * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon
-    //  *   a safe transfer.
-    //  *
-    //  * Emits a {Transfer} event.
-    //  */
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) external;
 }
