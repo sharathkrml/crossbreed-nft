@@ -16,17 +16,17 @@ contract DeplyBreedDalleScript is Script {
         BreedDalleNFT breedDalleNFT = new BreedDalleNFT(dalleNft);
         console.log(
             "minted dalleTokenId",
-            breedDalleNFT.mint([1, 2, 3, 1, 1])
+            breedDalleNFT.mint([1, 2, 3, 1, 1, 1, 1, 1, 1, 1])
         );
         console.log(
             "minted dalleTokenId",
-            breedDalleNFT.mint([1, 2, 3, 2, 1])
+            breedDalleNFT.mint([2, 1, 1, 2, 1, 1, 1, 1, 1, 1])
         );
         (address owner0, uint256 dalleTokenId0, ) = breedDalleNFT.mintInputs(0);
         console.log(owner0, dalleTokenId0);
         (address owner1, uint256 dalleTokenId1, ) = breedDalleNFT.mintInputs(1);
         console.log(owner1, dalleTokenId1);
-        breedDalleNFT.crossBreedAndMint(0, 1);
+        breedDalleNFT.breedAndMint(0, 1);
         vm.stopBroadcast();
     }
 }
