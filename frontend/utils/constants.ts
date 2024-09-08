@@ -165,3 +165,5 @@ export const BreedNFT = "0x0d6181BabDeA5D3A2546636Ed8672a21D954d181"
 export const BreedTopic =
   "0xddf1e8fec06a50aa72b8a39a06787808c53eca73b2bd1cc995681cf7b8014650"
 export const DalleNFT = "0x4440b5eBEBac3DC6C4d4Eca62520ef783067EdDf"
+
+export const galadrielExplorerPrefix = "https://explorer.galadriel.com/address/"

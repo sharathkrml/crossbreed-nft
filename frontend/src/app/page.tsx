@@ -1,6 +1,11 @@
 "use client"
 import { useState } from "react"
-import { questions } from "../../utils/constants"
+import {
+  BreedNFT,
+  DalleNFT,
+  galadrielExplorerPrefix,
+  questions,
+} from "../../utils/constants"
 import QuizPage from "./ui/QuizPage"
 import SubmitPage from "./ui/SubmitPage"
 import ConnectWeb3AuthButton from "./ui/Web3AuthButton"
@@ -41,23 +46,28 @@ const LandingPage = () => {
     setIsModalOpen(true)
     setMintSubmitted(false)
   }
-  // useEffect(() => {
-  //   const getTotalMints = async () => {
-  //     await showNFT(BigInt(242))
-  //   }
-  //   getTotalMints()
-  // }, [])
+
   return (
     <div className="min-h-screen">
       <Header pathname="/" />
       <div className="h-[80vh] flex flex-col item-center justify-center">
         {page === 0 && (
           <div className="">
-            <h2 className="text-2xl text-center">🐱 Mint yout Pet 🐶</h2>
-            <div className="flex items-center justify-center my-2">
-              <img src="./cooking.gif" alt="" className="w-[450px]" />
+            <h1 className="text-4xl text-center">
+              🐱
+              <span className="bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 bg-clip-text text-transparent">
+                Mint & Crossbreed
+              </span>
+              🐶
+            </h1>
+            <div className="flex items-center justify-center my-2 ">
+              <img
+                src="./cooking.gif"
+                alt=""
+                className="w-[450px] rounded-lg mt-4"
+              />
             </div>
-            <div className=" flex item-center justify-center">
+            <div className=" flex item-center justify-center pt-4">
               {isConnected ? (
                 <button
                   onClick={() => {
@@ -72,6 +82,24 @@ const LandingPage = () => {
               ) : (
                 <ConnectWeb3AuthButton />
               )}
+            </div>
+            <div className="flex flex-col items-center justify-center mt-4 text-center text-sm space-y-2">
+              <a
+                href={galadrielExplorerPrefix + DalleNFT}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent hover:text-blue-700 underline"
+              >
+                Dall-E Contract: {DalleNFT}
+              </a>
+              <a
+                href={galadrielExplorerPrefix + BreedNFT}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-gradient-to-r from-green-400 via-blue-500 to-purple-500 bg-clip-text text-transparent hover:text-blue-700 underline"
+              >
+                Breed Contract: {BreedNFT}
+              </a>
             </div>
           </div>
         )}

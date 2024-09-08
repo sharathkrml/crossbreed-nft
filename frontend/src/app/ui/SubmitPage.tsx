@@ -16,6 +16,7 @@ const SubmitPage = ({
   const { isConnected, provider } = useWeb3Auth()
   const handleSubmit = async () => {
     if (isConnected && provider) {
+      console.log(provider)
       const data = await mint(provider, getBreedInputs(formData))
       if (!data) return
       showNFT(data.tokenId)

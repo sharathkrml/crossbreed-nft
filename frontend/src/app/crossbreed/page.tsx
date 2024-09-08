@@ -104,7 +104,9 @@ const Crossbreed = () => {
         <Header pathname={pathname} />
       </div>
       <div className="">
-        <h1 className="text-3xl font-bold p-4">Crossbreed</h1>
+        <h1 className="text-3xl font-bold p-4 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent">
+          Crossbreed
+        </h1>
       </div>
       <div className="container p-4 flex w-full flex-wrap gap-3">
         {data.length > 0 ? (
