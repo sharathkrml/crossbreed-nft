@@ -3,7 +3,6 @@ import ConnectWeb3AuthButton from "./Web3AuthButton"
 import Link from "next/link"
 
 const Header = ({ pathname }: { pathname: string }) => {
-  console.log({ pathname })
   return (
     <header className="p-4 flex justify-end ">
       {pathname == "/" ? (

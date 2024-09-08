@@ -13,20 +13,50 @@ import {
   getTokenOwners,
   getTokenUris,
   NFTInfo,
+  pollMetadata,
+  decodeBreedEvent,
 } from "../../../utils/viemRPC"
 import { useWeb3Auth } from "@web3auth/modal-react-hooks"
+import NFTModal from "../ui/NftModal"
 
 const crossbreed = () => {
   const { isConnected, provider } = useWeb3Auth()
-
-  const [data, setData] = useState<NFTInfo[]>([])
-
-  const [tokenId1, setTokenId1] = useState<number | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [nft, setNft] = useState<NFTInfo>({} as NFTInfo)
   const [tokenIdToNftInfo, setTokenIdToNftInfo] = useState<{
     [key: string]: NFTInfo
   }>({})
-  const [tokenId2, setTokenId2] = useState<number | null>(null)
-  const [crossBreedTxHash, setCrossBreedTxHash] = useState<string>("")
+
+  const [data, setData] = useState<NFTInfo[]>([])
+
+  const [selected, setSelected] = useState<bigint[]>([])
+
+  const handleDivClick = (tokenId: bigint) => {
+    setSelected((prevSelected) => {
+      if (prevSelected.includes(tokenId)) {
+        return prevSelected.filter((id) => id !== tokenId)
+      } else {
+        if (prevSelected.length >= 2) {
+          return [prevSelected[1], tokenId] // Remove the oldest selection
+        }
+        return [...prevSelected, tokenId]
+      }
+    })
+  }
+
+  const handleNFT = async (tokenId: bigint) => {
+    const nftDetails = await pollMetadata(tokenId)
+    if (!nftDetails) return
+    setNft(nftDetails.nftInfos[0])
+    setIsModalOpen(true)
+    setData((prev) => nftDetails.nftInfos.concat(prev))
+    setTokenIdToNftInfo((prev) => {
+      prev[tokenId.toString()] = nftDetails.nftInfos[0]
+      return prev
+    })
+  }
+
+  const [loading, setLoading] = useState<boolean>(false)
 
   const pathname = usePathname()
   useEffect(() => {
@@ -34,111 +64,79 @@ const crossbreed = () => {
       let allTokenIds = await getAllTokenIds()
       console.log({ allTokenIds })
       const { nftInfos, tokenIdToNftInfo } = await getMetaData(allTokenIds)
-      setTokenIdToNftInfo(tokenIdToNftInfo)
       setData(nftInfos.reverse())
-      console.log(nftInfos)
+
+      setTokenIdToNftInfo(tokenIdToNftInfo)
     }
     fetch()
     // return () => {
     //   second
     // }
   }, [])
-  const handleCrossBreed = async (event: React.FormEvent) => {
-    event.preventDefault()
-    console.log("Token ID 1:", tokenId1)
-    console.log("Token ID 2:", tokenId2)
+  const handleCrossBreed = async () => {
+    setLoading(true)
     if (!provider) return
-    let data = await breedAndMint(provider, tokenId1!, tokenId2!)
-    if (data == null) return
-    setData((prev) => data.nftInfos.concat(prev))
+    const txHash = await breedAndMint(provider, selected[0], selected[1])
+    if (txHash) {
+      let nftInfo = await decodeBreedEvent(txHash)
+      if (nftInfo) {
+        handleNFT(nftInfo.tokenId)
+      }
+    }
+  }
+  const getButtonText = () => {
+    if (!loading) {
+      if (selected.length === 0) {
+        return "Choose Your Tokens to Begin!"
+      } else if (selected.length === 1) {
+        return `Token ${selected[0]} Selected! Pick One More!`
+      } else if (selected.length === 2) {
+        return `Ready to Crossbreed: ${selected[0]} & ${selected[1]}!`
+      }
+    } else {
+      return "Loading..."
+    }
+  }
+  const handleDivDoubleClick = async (tokenId: bigint) => {
+    const metadata = await pollMetadata(tokenId)
+    if (!metadata) return
+    setNft(metadata.nftInfos[0])
+    setIsModalOpen(true)
   }
 
-  const handleReset = () => {
-    setTokenId1(null)
-    setTokenId2(null)
-    setCrossBreedTxHash("")
-  }
   return (
-    <div className="min-h-screen">
-      <Header pathname={pathname} />
+    <div className="min-h-screen flex flex-col items-center">
+      <div className="min-w-full">
+        <Header pathname={pathname} />
+      </div>
       <div className="">
         <h1 className="text-3xl font-bold p-4">Crossbreed</h1>
-        <form className="p-4" onSubmit={handleCrossBreed}>
-          <div className="mb-4">
-            <label
-              htmlFor="tokenId1"
-              className="block text-gray-700 text-sm font-bold mb-2"
-            >
-              Token ID 1
-            </label>
-            <input
-              type="number"
-              id="tokenId1"
-              name="tokenId1"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              required
-              value={tokenId1 ?? ""}
-              onChange={(e) => setTokenId1(Number(e.target.value))}
-            />
-          </div>
-          <div className="mb-4">
-            <label
-              htmlFor="tokenId2"
-              className="block text-gray-700 text-sm font-bold mb-2"
-            >
-              Token ID 2
-            </label>
-            <input
-              type="number"
-              id="tokenId2"
-              name="tokenId2"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              required
-              value={tokenId2 ?? ""}
-              onChange={(e) => setTokenId2(Number(e.target.value))}
-            />
-          </div>
-          {crossBreedTxHash.length == 0 ? (
-            <button
-              type="submit"
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            >
-              Crossbreed
-            </button>
-          ) : (
-            <div className="">
-              <a
-                href={crossBreedTxHash}
-                target="_blank"
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              >
-                View Transaction
-              </a>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              >
-                Reset
-              </button>
-            </div>
-          )}
-        </form>
       </div>
-      <div className="container p-4 flex w-full flex-wrap">
+      <div className="container p-4 flex w-full flex-wrap gap-3">
         {data.length > 0 ? (
           data.map((event, index) => (
-            <div className="border-2 shadow-md rounded-lg p-4 mb-4 w-1/3">
-              <h2 className="text-xl font-bold mb-2">
-                {event.tokenId.toString()} -{" "}
-                {event.parent1 > BigInt(0) &&
-                  `child of ${event.parent1.toString()}
-                and ${event.parent1.toString()}`}
+            <div
+              key={event.tokenId}
+              className={`border-2 shadow-md rounded-lg p-4 mb-4 w-[calc(25%-0.75rem)] hover:cursor-pointer ${
+                selected.includes(event.tokenId)
+                  ? "border-blue-500"
+                  : "border-gray-300"
+              }`}
+              onClick={() => handleDivClick(event.tokenId)}
+              onDoubleClick={() => handleDivDoubleClick(event.tokenId)}
+            >
+              <h2 className="text-2xl font-extrabold mb-4 ">
+                {event.tokenId.toString()}
+                {event.parent1 > BigInt(0) && (
+                  <span className="bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 bg-clip-text text-transparent text-sm">
+                    {"( child of " +
+                      event.parent1.toString() +
+                      " & " +
+                      event.parent2.toString() +
+                      ")"}
+                  </span>
+                )}
               </h2>
-              <p className="text-gray-700">Original Owner: {event.owner}</p>
-              <p className="text-gray-700">
-                Current Owner: {event.currentOwner}
-              </p>
               <img
                 src={event.imageUrl}
                 alt={event.tokenId.toString()}
@@ -147,9 +145,43 @@ const crossbreed = () => {
             </div>
           ))
         ) : (
-          <p>Loading events...</p>
+          <p className="text-center text-gray-500 text-lg mt-4 animate-pulse">
+            Loading NFTs...
+          </p>
         )}
       </div>
+      <div
+        className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 py-2 px-4 `}
+      >
+        {isConnected ? (
+          <button
+            className={`rounded shadow-lg
+              py-2 px-4 
+              ${
+                selected.length === 2
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-500 text-gray-300"
+              }`}
+            onClick={handleCrossBreed}
+          >
+            {getButtonText()}
+          </button>
+        ) : (
+          <ConnectWeb3AuthButton />
+        )}
+      </div>
+      {isModalOpen && (
+        <NFTModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false)
+            setLoading(false)
+            setSelected([])
+          }}
+          nft={nft}
+          tokenIdToNftInfo={tokenIdToNftInfo}
+        />
+      )}
     </div>
   )
 }

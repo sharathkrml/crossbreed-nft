@@ -83,8 +83,8 @@ export const mint = async (provider: IProvider, input: number[]) => {
 
 export const breedAndMint = async (
   provider: IProvider,
-  input1: number,
-  input2: number
+  input1: bigint,
+  input2: bigint
 ) => {
   let client = getWalletClient(provider)
   const [account] = await client.getAddresses()
@@ -96,8 +96,7 @@ export const breedAndMint = async (
       args: [input1, input2],
       account,
     })
-    let decodedEvent = await decodeBreedEvent(response)
-    return await pollMetadata(decodedEvent.tokenId)
+    return response
   } catch (e) {
     console.log(e)
   }
@@ -115,33 +114,37 @@ export const pollMetadata = async (tokenId: bigint) => {
   }
 }
 export const decodeBreedEvent = async (hash: Hash) => {
-  const data = await publicClient.waitForTransactionReceipt({
-    hash: hash,
-  })
+  try {
+    const data = await publicClient.waitForTransactionReceipt({
+      hash: hash,
+    })
+    if (data.status === "reverted") {
+      alert("Transaction Reverted")
+      return
+    }
 
-  for (let i = 0; i < data.logs.length; i++) {
-    if (data.logs[i].topics[0] == BreedTopic) {
-      let decodedEvent = decodeEventLog({
-        abi: BreedDalleNFT.abi,
-        eventName: "Breed",
-        topics: data.logs[i].topics,
-        data: data.logs[i].data,
-      })
-      console.log(decodedEvent)
-      if (decodedEvent.eventName && decodedEvent.args) {
-        const data = decodedEvent.args as { [key: string]: any }
-        console.log(data["owner"])
-        console.log(data["tokenId"])
-        console.log(data["tokenId1"])
-        console.log(data["tokenId2"])
-        return {
-          owner: data["owner"] as string,
-          tokenId: data["tokenId"] as bigint,
-          tokenId1: data["tokenId1"] as bigint,
-          tokenId2: data["tokenId2"] as bigint,
+    for (let i = 0; i < data.logs.length; i++) {
+      if (data.logs[i].topics[0] == BreedTopic) {
+        let decodedEvent = decodeEventLog({
+          abi: BreedDalleNFT.abi,
+          eventName: "Breed",
+          topics: data.logs[i].topics,
+          data: data.logs[i].data,
+        })
+        console.log(decodedEvent)
+        if (decodedEvent.eventName && decodedEvent.args) {
+          const data = decodedEvent.args as { [key: string]: any }
+          return {
+            owner: data["owner"] as string,
+            tokenId: data["tokenId"] as bigint,
+            tokenId1: data["tokenId1"] as bigint,
+            tokenId2: data["tokenId2"] as bigint,
+          }
         }
       }
     }
+  } catch (e) {
+    console.log(e)
   }
 
   return {
