@@ -1,16 +1,11 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { questions } from "../../utils/constants"
 import QuizPage from "./ui/QuizPage"
 import SubmitPage from "./ui/SubmitPage"
 import ConnectWeb3AuthButton from "./ui/Web3AuthButton"
 import { useWeb3Auth } from "@web3auth/modal-react-hooks"
-import {
-  decodeBreedEvent,
-  getMetaData,
-  NFTInfo,
-  pollMetadata,
-} from "../../utils/viemRPC"
+import { NFTInfo, pollMetadata } from "../../utils/viemRPC"
 import Header from "./ui/Header"
 import NFTModal from "./ui/NftModal"
 // Landing Page

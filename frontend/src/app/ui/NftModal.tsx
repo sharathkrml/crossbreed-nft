@@ -1,14 +1,6 @@
-import { useEffect, useState } from "react"
-import Image from "next/image"
-import {
-  getAccount,
-  getDalleNFTOwner,
-  getDalleNFTUrl,
-  NFTInfo,
-} from "../../../utils/viemRPC"
+import { NFTInfo } from "../../../utils/viemRPC"
 
 import { questions } from "../../../utils/constants"
-import { useWeb3Auth } from "@web3auth/modal-react-hooks"
 type NFTModalProps = {
   isOpen: boolean
   onClose: () => void
@@ -24,9 +16,6 @@ const NFTModal = ({
   tokenIdToNftInfo,
 }: NFTModalProps) => {
   if (!isOpen) return null
-  console.log(nft.parent1.toString(), nft.parent2.toString())
-  console.log(tokenIdToNftInfo)
-
   const imageUri1 = tokenIdToNftInfo[nft.parent1.toString()]?.imageUrl || ""
   const imageUri2 = tokenIdToNftInfo[nft.parent2.toString()]?.imageUrl || ""
   return (

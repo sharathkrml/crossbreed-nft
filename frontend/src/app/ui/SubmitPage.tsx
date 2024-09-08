@@ -1,5 +1,4 @@
 import { useWeb3Auth } from "@web3auth/modal-react-hooks"
-import { getChainId } from "viem/actions"
 import { getBreedInputs } from "../../../utils/utils"
 import { mint } from "../../../utils/viemRPC"
 
@@ -14,10 +13,11 @@ const SubmitPage = ({
   showNFT: (tokenId: bigint) => Promise<void>
   mintSubmitted: boolean
 }) => {
-  const { isConnected, connect, web3Auth, initModal, provider } = useWeb3Auth()
+  const { isConnected, provider } = useWeb3Auth()
   const handleSubmit = async () => {
     if (isConnected && provider) {
-      let data = await mint(provider, getBreedInputs(formData))
+      const data = await mint(provider, getBreedInputs(formData))
+      if (!data) return
       showNFT(data.tokenId)
     }
     // Here you would typically send the data to your blockchain

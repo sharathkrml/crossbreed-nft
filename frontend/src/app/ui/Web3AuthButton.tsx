@@ -29,8 +29,7 @@ const ConnectWeb3AuthButton = () => {
     if (isConnected && provider) {
       const getAcc = async () => {
         console.log("Connected to wallet")
-        let address = await getAccount(provider)
-        console.log(address)
+        const address = await getAccount(provider)
         setAccount(address)
       }
       getAcc()

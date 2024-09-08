@@ -1,25 +1,20 @@
 "use client"
 import React, { useEffect, useState } from "react"
 import ConnectWeb3AuthButton from "../ui/Web3AuthButton"
-import Header from "../ui/Header"
-import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Hash } from "viem"
 import {
   breedAndMint,
   getMetaData,
   getAllTokenIds,
-  getMintInputs,
-  getTokenOwners,
-  getTokenUris,
   NFTInfo,
   pollMetadata,
   decodeBreedEvent,
 } from "../../../utils/viemRPC"
 import { useWeb3Auth } from "@web3auth/modal-react-hooks"
 import NFTModal from "../ui/NftModal"
+import Header from "../ui/Header"
 
-const crossbreed = () => {
+const Crossbreed = () => {
   const { isConnected, provider } = useWeb3Auth()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [nft, setNft] = useState<NFTInfo>({} as NFTInfo)
@@ -61,8 +56,7 @@ const crossbreed = () => {
   const pathname = usePathname()
   useEffect(() => {
     const fetch = async () => {
-      let allTokenIds = await getAllTokenIds()
-      console.log({ allTokenIds })
+      const allTokenIds = await getAllTokenIds()
       const { nftInfos, tokenIdToNftInfo } = await getMetaData(allTokenIds)
       setData(nftInfos.reverse())
 
@@ -78,7 +72,7 @@ const crossbreed = () => {
     if (!provider) return
     const txHash = await breedAndMint(provider, selected[0], selected[1])
     if (txHash) {
-      let nftInfo = await decodeBreedEvent(txHash)
+      const nftInfo = await decodeBreedEvent(txHash)
       if (nftInfo) {
         handleNFT(nftInfo.tokenId)
       }
@@ -114,7 +108,7 @@ const crossbreed = () => {
       </div>
       <div className="container p-4 flex w-full flex-wrap gap-3">
         {data.length > 0 ? (
-          data.map((event, index) => (
+          data.map((event) => (
             <div
               key={event.tokenId}
               className={`border-2 shadow-md rounded-lg p-4 mb-4 w-[calc(25%-0.75rem)] hover:cursor-pointer ${
@@ -186,4 +180,4 @@ const crossbreed = () => {
   )
 }
 
-export default crossbreed
+export default Crossbreed
